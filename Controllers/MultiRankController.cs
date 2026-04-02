@@ -180,7 +180,7 @@ public sealed class MultiRankController : ControllerBase
         var data = Genres.GetWaifuIcon(genreId, rankIndex);
         if (data == null) return NotFound();
 
-        // Verwendet explizit die Methode der Basisklasse, um Konflikt mit System.IO.File zu vermeiden
+        // Verwendet base.File um Konflikte mit System.IO.File zu vermeiden
         return base.File(data, "image/png");
     }
 
@@ -218,7 +218,6 @@ public sealed class MultiRankController : ControllerBase
         var id = CurrentUserId();
         if (id is null) return false;
         var u = _users.GetUserById(Guid.Parse(id));
-        // PermissionKind ist in MediaBrowser.Model.Entities definiert
         return u?.HasPermission(PermissionKind.IsAdministrator) ?? false;
     }
 
