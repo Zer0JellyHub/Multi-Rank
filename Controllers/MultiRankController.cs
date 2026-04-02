@@ -12,7 +12,6 @@ using Microsoft.Extensions.Logging;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Users;
 using MediaBrowser.Model.Library; 
-using MediaBrowser.Model.Entities; 
 
 using Jellyfin.Plugin.MultiRank.Models;
 using Jellyfin.Plugin.MultiRank.Services;
@@ -180,7 +179,7 @@ public sealed class MultiRankController : ControllerBase
         var data = Genres.GetWaifuIcon(genreId, rankIndex);
         if (data == null) return NotFound();
 
-        // Verwendet base.File um Konflikte mit System.IO.File zu vermeiden
+        // base.File verhindert Konflikte mit System.IO.File
         return base.File(data, "image/png");
     }
 
@@ -219,8 +218,8 @@ public sealed class MultiRankController : ControllerBase
         if (id is null) return false;
         var u = _users.GetUserById(Guid.Parse(id));
         
-        // Vollständiger Pfad zu PermissionKind, um Build-Fehler CS0103 zu vermeiden
-        return u?.HasPermission(MediaBrowser.Model.Entities.PermissionKind.IsAdministrator) ?? false;
+        // SICHERE METHODE: Prüfe direkt die Administrator-Eigenschaft des Users
+        return u != null && u.HasPermission(MediaBrowser.Model.Entities.PermissionKind.IsAdministrator);
     }
 
     private string PlaybackDbPath()
