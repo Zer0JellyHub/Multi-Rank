@@ -66,10 +66,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: MultiRank-${{ github.ref_name }}.zip
-          body: |
-            ### Jellyfin Repository URL
-```
-            https://raw.githubusercontent.com/Zer0JellyHub/Multi-Rank/main/manifest.json
-```
+          body: "Jellyfin Repository URL: https://raw.githubusercontent.com/Zer0JellyHub/Multi-Rank/main/manifest.json"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
