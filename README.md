@@ -36,17 +36,6 @@
 4. Jellyfin neu starten
 5. **🎮 MultiRank** im Seitenmenü öffnen
 
-### Selbst kompilieren *(für Entwickler)*
-```bash
-git clone https://github.com/Zer0JellyHub/Multi-Rank
-cd Multi-Rank
-dotnet publish --configuration Release --output ./publish
-# Alle Dateien aus ./publish/ in den Plugin-Ordner kopieren:
-# Linux:   ~/.local/share/jellyfin/plugins/MultiRank/
-# Windows: %APPDATA%\jellyfin\plugins\MultiRank\
-# Docker:  /config/plugins/MultiRank/
-```
-
 ---
 
 ## ⚙️ Admin-Einstellungen
