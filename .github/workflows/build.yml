@@ -31,12 +31,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
+
       - run: |
           dotnet restore
           dotnet publish --configuration Release --output ./publish
+
       - name: Create ZIP
         run: |
           cd ./publish
@@ -46,6 +49,7 @@ jobs:
             SQLitePCLRaw.batteries_v2.dll \
             SQLitePCLRaw.core.dll \
             SQLitePCLRaw.provider.e_sqlite3.dll 2>/dev/null || true
+
       - name: Update manifest.json
         run: |
           VER="${{ github.ref_name }}"
@@ -53,9 +57,9 @@ jobs:
           MD5=$(md5sum "MultiRank-${VER}.zip" | awk '{print $1}')
           TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           URL="https://github.com/Zer0JellyHub/Multi-Rank/releases/download/${VER}/MultiRank-${VER}.zip"
-          cat > manifest.json << EOF
-[{"guid":"b2f3d4e5-6789-4abc-def0-123456789abc","name":"MultiRank","description":"Multi-genre ranking plugin for Jellyfin","overview":"Requires Playback Reporting Plugin","owner":"Zer0JellyHub","category":"General","versions":[{"version":"${VER_CLEAN}.0","changelog":"${URL}","targetAbi":"10.9.0.0","sourceUrl":"${URL}","checksum":"${MD5}","timestamp":"${TS}"}]}]
-EOF
+          printf '[{"guid":"b2f3d4e5-6789-4abc-def0-123456789abc","name":"MultiRank","description":"Multi-genre ranking plugin for Jellyfin","overview":"Requires Playback Reporting Plugin","owner":"Zer0JellyHub","category":"General","versions":[{"version":"%s.0","changelog":"%s","targetAbi":"10.9.0.0","sourceUrl":"%s","checksum":"%s","timestamp":"%s"}]}]\n' \
+            "$VER_CLEAN" "$URL" "$URL" "$MD5" "$TS" > manifest.json
+
       - name: Commit manifest
         run: |
           git config user.name "github-actions[bot]"
@@ -63,18 +67,14 @@ EOF
           git add manifest.json
           git commit -m "chore: update manifest for ${{ github.ref_name }}" || true
           git push origin HEAD:main || true
-- uses: softprops/action-gh-release@v2
+
+      - uses: softprops/action-gh-release@v2
         with:
           files: MultiRank-${{ github.ref_name }}.zip
           body: |
             ### Jellyfin Repository URL
+```
             https://raw.githubusercontent.com/Zer0JellyHub/Multi-Rank/main/manifest.json
+```
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
-
-Dann unten **`Commit changes`** → **`Commit directly to the main branch`** → **`Commit changes`** ✅
-
-Danach Release erstellen:
-```
-github.com/Zer0JellyHub/Multi-Rank/releases/new
