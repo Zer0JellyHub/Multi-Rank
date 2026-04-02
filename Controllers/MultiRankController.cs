@@ -218,7 +218,9 @@ public sealed class MultiRankController : ControllerBase
         var id = CurrentUserId();
         if (id is null) return false;
         var u = _users.GetUserById(Guid.Parse(id));
-        return u?.HasPermission(PermissionKind.IsAdministrator) ?? false;
+        
+        // Vollständiger Pfad zu PermissionKind, um Build-Fehler CS0103 zu vermeiden
+        return u?.HasPermission(MediaBrowser.Model.Entities.PermissionKind.IsAdministrator) ?? false;
     }
 
     private string PlaybackDbPath()
