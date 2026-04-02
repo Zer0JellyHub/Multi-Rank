@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Users;
 using MediaBrowser.Model.Library; 
-using MediaBrowser.Model.Entities; // <-- Hinzugefügt für PermissionKind Sicherheit
+using MediaBrowser.Model.Entities; 
 
 using Jellyfin.Plugin.MultiRank.Models;
 using Jellyfin.Plugin.MultiRank.Services;
@@ -180,7 +180,7 @@ public sealed class MultiRankController : ControllerBase
         var data = Genres.GetWaifuIcon(genreId, rankIndex);
         if (data == null) return NotFound();
 
-        // Wichtig: explizit Microsoft.AspNetCore.Mvc.ControllerBase.File
+        // Verwendet explizit die Methode der Basisklasse, um Konflikt mit System.IO.File zu vermeiden
         return base.File(data, "image/png");
     }
 
@@ -211,26 +211,6 @@ public sealed class MultiRankController : ControllerBase
         return Ok(new { id = s.Id, name = s.Name, daysRemaining = Seasons.DaysRemaining() });
     }
 
-    [HttpGet("Season/YearEnd/{year:int}")]
-    public IActionResult GetYearEnd(int year)
-    {
-        var history = Db.GetAllHistoryForYear(year);
-        var allUsers = Db.GetAllUsers().ToDictionary(u => u.UserId);
-        var grouped = history.GroupBy(h => h.UserId).Select(g => {
-            allUsers.TryGetValue(g.Key, out var u);
-            return new { username = u?.Username ?? g.Key, yearXp = g.Sum(h => h.XpEarned) };
-        }).OrderByDescending(x => x.yearXp).ToList();
-        return Ok(grouped);
-    }
-
-    [HttpGet("History")]
-    public IActionResult GetMyHistory()
-    {
-        var userId = CurrentUserId();
-        if (userId is null) return Unauthorized();
-        return Ok(Db.GetUserHistory(userId));
-    }
-
     private string? CurrentUserId() => HttpContext.User.FindFirst("Emby.UserId")?.Value;
 
     private bool IsAdmin()
@@ -238,17 +218,21 @@ public sealed class MultiRankController : ControllerBase
         var id = CurrentUserId();
         if (id is null) return false;
         var u = _users.GetUserById(Guid.Parse(id));
-        // PermissionKind wird durch MediaBrowser.Model.Entities oder .Library abgedeckt
+        // PermissionKind ist in MediaBrowser.Model.Entities definiert
         return u?.HasPermission(PermissionKind.IsAdministrator) ?? false;
     }
 
     private string PlaybackDbPath()
     {
         if (!string.IsNullOrEmpty(Cfg.PlaybackReportingDbPath)) return Cfg.PlaybackReportingDbPath;
-        var paths = new[] { "/config/data", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "jellyfin", "data") };
+        var paths = new[] { 
+            "/config/data", 
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", "jellyfin", "data"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "jellyfin", "data")
+        };
         foreach (var p in paths) {
             var c = Path.Combine(p, "playback_reporting.db");
-            if (File.Exists(c)) return c;
+            if (System.IO.File.Exists(c)) return c;
         }
         return string.Empty;
     }
