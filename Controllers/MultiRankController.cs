@@ -1,3 +1,4 @@
+using MediaBrowser.Model.Library;
 using Jellyfin.Plugin.MultiRank.Models;
 using Jellyfin.Plugin.MultiRank.Services;
 using MediaBrowser.Controller.Library;
