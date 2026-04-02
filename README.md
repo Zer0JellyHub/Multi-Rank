@@ -1,72 +1,72 @@
 # 🎮 MultiRank – Jellyfin Plugin (working)
 
-> **Voraussetzung:** [Playback Reporting Plugin](https://github.com/jellyfin/jellyfin-plugin-playbackreporting) muss installiert sein.
+> **Requirement:** [Playback Reporting Plugin](https://github.com/jellyfin/jellyfin-plugin-playbackreporting) must be installed.
 
 ---
 
 ## ✨ Features
 
-| Genre | Ränge | |
+| Genre | Ranks | |
 |---|---|---|
-| **Isekai** | Bauer → Dorfbewohner → Lehrling → Abenteurer F/E/D → Krieger → Ritter → Edelmann → Baron → Graf → Herzog → König → Legendär → **Held** | 15 Ränge |
-| **Abenteurer-Gilde** | Kupfer → Eisen → Silber → Gold → Platin → Mithril → Orichalcum → Adamantit → **Diamant** *(Bonus)* | 9 Ränge |
-| **Fortnite Ranked** | Bronze → Silber → Gold → Platin → Diamant → Elite → Champion → **Unreal** | 8 Ränge, keine Sub-Divisionen |
-| **Waifu Tier** | 6 Slots – eigene Bilder hochladen, werden zu Icons | |
-| **Custom** | Eigene Genres mit beliebigen Rängen direkt in der UI erstellen | |
+| **Isekai** | Farmer → Villager → Apprentice → Adventurer F/E/D → Warrior → Knight → Nobleman → Baron → Count → Duke → King → Legendary → **Hero** | 15 Ranks |
+| **Adventurer's Guild** | Copper → Iron → Silver → Gold → Platinum → Mithril → Orichalcum → Adamantite → **Diamond** *(Bonus)* | 9 Ranks |
+| **Fortnite Ranked** | Bronze → Silver → Gold → Platinum → Diamond → Elite → Champion → **Unreal** | 8 Ranks, no Sub-Divisions |
+| **Waifu Tier** | 6 Slots – upload your own images, they become icons | |
+| **Custom** | Create your own genres with any ranks directly in the UI | |
 
-- 📊 **XP-System** – XP/Minute + Abschluss-Bonus (Anti-Cheat: nur echte Schauzeit)
-- 🔥 **Watch-Session Bonus** – Wer an einem Tag ≥ 90 Min schaut bekommt +25% XP
-- 🗓️ **Seasons** – Winter/Frühling/Sommer/Herbst (automatisch, kein manuelles Reset nötig)
-- 🏆 **Jahres-Rückblick** – wird am Ende der Winter-Season eingeblendet
-- ✨ **Prestige** – XP Reset nach dem Top-Rang mit Prestige-Badge
-- 🌍 **DE / EN** – Sprache per Knopf in der UI umschalten
+- 📊 **XP System** – XP/Minute + completion bonus (Anti-Cheat: real watch time only)
+- 🔥 **Watch-Session Bonus** – Watch ≥ 90 min in one day to get +25% XP
+- 🗓️ **Seasons** – Winter/Spring/Summer/Autumn (automatic, no manual reset needed)
+- 🏆 **Year in Review** – displayed at the end of the Winter Season
+- ✨ **Prestige** – XP reset after the top rank with a Prestige Badge
+- 🌍 **DE / EN** – switch language via button in the UI
 
 ---
 
 ## 🚀 Installation
 
-### Jellyfin Plugin-Repository *(empfohlen)*
+### Jellyfin Plugin Repository *(recommended)*
 
-1. Jellyfin Dashboard öffnen → **Einstellungen → Plugins → Repositories**
-2. Folgende URL als neues Repository hinzufügen:
+1. Open Jellyfin Dashboard → **Settings → Plugins → Repositories**
+2. Add the following URL as a new repository:
 ```
    https://raw.githubusercontent.com/Zer0JellyHub/Multi-Rank/main/manifest.json
 ```
-3. **Katalog** öffnen → **MultiRank** suchen → installieren
-4. Jellyfin neu starten
-5. **🎮 MultiRank** im Seitenmenü öffnen
+3. Open **Catalog** → search for **MultiRank** → install
+4. Restart Jellyfin
+5. Open **🎮 MultiRank** in the side menu
 
 ---
 
-## ⚙️ Admin-Einstellungen
+## ⚙️ Admin Settings
 
 Dashboard → Plugins → MultiRank
 
-| Einstellung | Standard | Beschreibung |
+| Setting | Default | Description |
 |---|---|---|
-| XP/Minute | 2 | Echte Schauzeit |
-| XP/Episode | 20 | Abschluss-Bonus |
-| XP/Film | 50 | Abschluss-Bonus |
-| Min. Abschluss % | 80 % | Anti-Cheat |
-| Session-Bonus | EIN | Watch-Marathon Bonus |
-| Session-Schwelle | 90 Min | Mindest-Watchtime/Tag |
-| Session-Bonus % | 25 % | Aufschlag |
+| XP/Minute | 2 | Real watch time |
+| XP/Episode | 20 | Completion bonus |
+| XP/Movie | 50 | Completion bonus |
+| Min. Completion % | 80 % | Anti-Cheat |
+| Session Bonus | ON | Watch marathon bonus |
+| Session Threshold | 90 min | Minimum watchtime/day |
+| Session Bonus % | 25 % | Bonus multiplier |
 
 ---
 
-## 🏰 Abenteurer-Gilde Ränge (Overlord-Style)
+## 🏰 Adventurer's Guild Ranks (Overlord-Style)
 
-| # | Rang | XP | Beschreibung |
+| # | Rank | XP | Description |
 |---|---|---|---|
-| 1 | 🪙 Kupfer | 0 | Anfänger – niemand kennt deinen Namen |
-| 2 | ⚙️ Eisen | 40.000 | Einsteiger – erste Quests überlebt |
-| 3 | 🥈 Silber | 120.000 | Erfahren – die Rezeptionistin kennt dich |
-| 4 | 🥇 Gold | 300.000 | Wie Climb – Limit für talentlose Menschen |
-| 5 | 💠 Platin | 700.000 | Elitestufe – Gruppenführer |
-| 6 | 🔵 Mithril | 1.500.000 | Lokale Berühmtheit |
-| 7 | 🟠 Orichalcum | 3.000.000 | Selten gesehen – Könige horchen auf |
-| 8 | 🔱 Adamantit | 5.000.000 | Höchster offizieller Rang – wie Momon |
-| 9 | 💎 **Diamant** | 6.500.000 | **Bonus-Rang** – jenseits jeder Klassifikation |
+| 1 | 🪙 Copper | 0 | Beginner – nobody knows your name |
+| 2 | ⚙️ Iron | 40,000 | Newcomer – survived the first quests |
+| 3 | 🥈 Silver | 120,000 | Experienced – the receptionist knows you |
+| 4 | 🥇 Gold | 300,000 | Like Climb – the limit for untalented people |
+| 5 | 💠 Platinum | 700,000 | Elite level – group leader |
+| 6 | 🔵 Mithril | 1,500,000 | Local celebrity |
+| 7 | 🟠 Orichalcum | 3,000,000 | Rarely seen – kings take notice |
+| 8 | 🔱 Adamantite | 5,000,000 | Highest official rank – like Momon |
+| 9 | 💎 **Diamond** | 6,500,000 | **Bonus Rank** – beyond all classification |
 
 ---
 
@@ -74,20 +74,20 @@ Dashboard → Plugins → MultiRank
 
 | Method | Endpoint | |
 |---|---|---|
-| GET | `/MultiRank/Me` | Eigener Rang + XP |
-| GET | `/MultiRank/Leaderboard?season=true` | Rangliste |
-| GET | `/MultiRank/Genres` | Alle Genres |
-| POST | `/MultiRank/Genre/SetActive` | Genre wechseln |
-| POST | `/MultiRank/Genre/Custom` | Custom Genre (Admin) |
-| DELETE | `/MultiRank/Genre/Custom/{id}` | Löschen (Admin) |
-| POST | `/MultiRank/Waifu/UploadIcon/{genreId}/{i}` | Bild hochladen (Admin) |
+| GET | `/MultiRank/Me` | Own rank + XP |
+| GET | `/MultiRank/Leaderboard?season=true` | Leaderboard |
+| GET | `/MultiRank/Genres` | All genres |
+| POST | `/MultiRank/Genre/SetActive` | Switch genre |
+| POST | `/MultiRank/Genre/Custom` | Custom genre (Admin) |
+| DELETE | `/MultiRank/Genre/Custom/{id}` | Delete (Admin) |
+| POST | `/MultiRank/Waifu/UploadIcon/{genreId}/{i}` | Upload image (Admin) |
 | POST | `/MultiRank/Prestige` | Prestige! |
-| GET | `/MultiRank/Season` | Aktuelle Season |
-| GET | `/MultiRank/Season/YearEnd/{year}` | Jahres-Rückblick |
-| GET | `/MultiRank/History` | Eigene Season-History |
+| GET | `/MultiRank/Season` | Current season |
+| GET | `/MultiRank/Season/YearEnd/{year}` | Year in review |
+| GET | `/MultiRank/History` | Own season history |
 
 ---
 
-## 📄 Lizenz
+## 📄 License
 
 AGPL-3.0
