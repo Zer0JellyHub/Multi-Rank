@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+
+// Jellyfin / MediaBrowser Namespaces
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Users;
 using MediaBrowser.Model.Library; 
+
 using Jellyfin.Plugin.MultiRank.Models;
 using Jellyfin.Plugin.MultiRank.Services;
 
@@ -214,9 +217,9 @@ public sealed class MultiRankController : ControllerBase
         if (id is null) return false;
         var u = _users.GetUserById(Guid.Parse(id));
         
-        // Wir nutzen das direkte Property 'HasPermission', 
-        // ohne auf den Enum-Namen 'PermissionKind' zu verweisen.
-        return u != null && u.HasPermission(MediaBrowser.Model.Entities.PermissionKind.IsAdministrator);
+        // Wir prüfen direkt das Administrator-Flag des Users.
+        // Das vermeidet jegliche Abhängigkeit von der Klasse 'PermissionKind'.
+        return u != null && u.IsAdministrator;
     }
 
     private string PlaybackDbPath()
