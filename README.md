@@ -1,4 +1,4 @@
-# 🎮 MultiRank – Jellyfin Plugin
+# 🎮 MultiRank – Jellyfin Plugin (working)
 
 > **Voraussetzung:** [Playback Reporting Plugin](https://github.com/jellyfin/jellyfin-plugin-playbackreporting) muss installiert sein.
 
@@ -7,7 +7,7 @@
 ## ✨ Features
 
 | Genre | Ränge | |
-|-------|-------|-|
+|---|---|---|
 | **Isekai** | Bauer → Dorfbewohner → Lehrling → Abenteurer F/E/D → Krieger → Ritter → Edelmann → Baron → Graf → Herzog → König → Legendär → **Held** | 15 Ränge |
 | **Abenteurer-Gilde** | Kupfer → Eisen → Silber → Gold → Platin → Mithril → Orichalcum → Adamantit → **Diamant** *(Bonus)* | 9 Ränge |
 | **Fortnite Ranked** | Bronze → Silber → Gold → Platin → Diamant → Elite → Champion → **Unreal** | 8 Ränge, keine Sub-Divisionen |
@@ -25,31 +25,26 @@
 
 ## 🚀 Installation
 
-### Option A – ZIP aus GitHub Releases
+### Jellyfin Plugin-Repository *(empfohlen)*
 
-1. Neueste ZIP-Datei von der [Releases-Seite](../../releases) herunterladen
-2. Alle DLL-Dateien in den Plugin-Ordner kopieren:
-   - **Linux:**   `~/.local/share/jellyfin/plugins/MultiRank/`
-   - **Windows:** `%APPDATA%\jellyfin\plugins\MultiRank\`
-   - **Docker:**  `/config/plugins/MultiRank/`
-3. Jellyfin neu starten
-4. **🎮 MultiRank** im Seitenmenü öffnen
+1. Jellyfin Dashboard öffnen → **Einstellungen → Plugins → Repositories**
+2. Folgende URL als neues Repository hinzufügen:
+```
+   https://raw.githubusercontent.com/Zer0JellyHub/Multi-Rank/main/manifest.json
+```
+3. **Katalog** öffnen → **MultiRank** suchen → installieren
+4. Jellyfin neu starten
+5. **🎮 MultiRank** im Seitenmenü öffnen
 
-### Option B – Selbst kompilieren
-
+### Selbst kompilieren *(für Entwickler)*
 ```bash
-git clone https://github.com/YOUR-USERNAME/MultiRank
-cd MultiRank
+git clone https://github.com/Zer0JellyHub/Multi-Rank
+cd Multi-Rank
 dotnet publish --configuration Release --output ./publish
-# Alle Dateien aus ./publish/ in den Plugin-Ordner kopieren
-```
-
-### Option C – Jellyfin Plugin-Repository
-
-In den Dashboard-Einstellungen folgende URL als Repository hinzufügen:
-
-```
-https://raw.githubusercontent.com/YOUR-USERNAME/MultiRank/main/manifest.json
+# Alle Dateien aus ./publish/ in den Plugin-Ordner kopieren:
+# Linux:   ~/.local/share/jellyfin/plugins/MultiRank/
+# Windows: %APPDATA%\jellyfin\plugins\MultiRank\
+# Docker:  /config/plugins/MultiRank/
 ```
 
 ---
@@ -59,7 +54,7 @@ https://raw.githubusercontent.com/YOUR-USERNAME/MultiRank/main/manifest.json
 Dashboard → Plugins → MultiRank
 
 | Einstellung | Standard | Beschreibung |
-|-------------|---------|--------------|
+|---|---|---|
 | XP/Minute | 2 | Echte Schauzeit |
 | XP/Episode | 20 | Abschluss-Bonus |
 | XP/Film | 50 | Abschluss-Bonus |
@@ -73,34 +68,34 @@ Dashboard → Plugins → MultiRank
 ## 🏰 Abenteurer-Gilde Ränge (Overlord-Style)
 
 | # | Rang | XP | Beschreibung |
-|---|------|----|-------------|
-| 1 | 🪙 Kupfer     | 0           | Anfänger – niemand kennt deinen Namen |
-| 2 | ⚙️ Eisen      | 40.000      | Einsteiger – erste Quests überlebt |
-| 3 | 🥈 Silber     | 120.000     | Erfahren – die Rezeptionistin kennt dich |
-| 4 | 🥇 Gold       | 300.000     | Wie Climb – Limit für talentlose Menschen |
-| 5 | 💠 Platin     | 700.000     | Elitestufe – Gruppenführer |
-| 6 | 🔵 Mithril    | 1.500.000   | Lokale Berühmtheit |
-| 7 | 🟠 Orichalcum | 3.000.000   | Selten gesehen – Könige horchen auf |
-| 8 | 🔱 Adamantit  | 5.000.000   | Höchster offizieller Rang – wie Momon |
-| 9 | 💎 **Diamant** | 6.500.000  | **Bonus-Rang** – jenseits jeder Klassifikation |
+|---|---|---|---|
+| 1 | 🪙 Kupfer | 0 | Anfänger – niemand kennt deinen Namen |
+| 2 | ⚙️ Eisen | 40.000 | Einsteiger – erste Quests überlebt |
+| 3 | 🥈 Silber | 120.000 | Erfahren – die Rezeptionistin kennt dich |
+| 4 | 🥇 Gold | 300.000 | Wie Climb – Limit für talentlose Menschen |
+| 5 | 💠 Platin | 700.000 | Elitestufe – Gruppenführer |
+| 6 | 🔵 Mithril | 1.500.000 | Lokale Berühmtheit |
+| 7 | 🟠 Orichalcum | 3.000.000 | Selten gesehen – Könige horchen auf |
+| 8 | 🔱 Adamantit | 5.000.000 | Höchster offizieller Rang – wie Momon |
+| 9 | 💎 **Diamant** | 6.500.000 | **Bonus-Rang** – jenseits jeder Klassifikation |
 
 ---
 
 ## 🔌 API
 
 | Method | Endpoint | |
-|--------|----------|-|
-| GET  | `/MultiRank/Me`                              | Eigener Rang + XP |
-| GET  | `/MultiRank/Leaderboard?season=true`         | Rangliste |
-| GET  | `/MultiRank/Genres`                          | Alle Genres |
-| POST | `/MultiRank/Genre/SetActive`                 | Genre wechseln |
-| POST | `/MultiRank/Genre/Custom`                    | Custom Genre (Admin) |
-| DELETE | `/MultiRank/Genre/Custom/{id}`             | Löschen (Admin) |
+|---|---|---|
+| GET | `/MultiRank/Me` | Eigener Rang + XP |
+| GET | `/MultiRank/Leaderboard?season=true` | Rangliste |
+| GET | `/MultiRank/Genres` | Alle Genres |
+| POST | `/MultiRank/Genre/SetActive` | Genre wechseln |
+| POST | `/MultiRank/Genre/Custom` | Custom Genre (Admin) |
+| DELETE | `/MultiRank/Genre/Custom/{id}` | Löschen (Admin) |
 | POST | `/MultiRank/Waifu/UploadIcon/{genreId}/{i}` | Bild hochladen (Admin) |
-| POST | `/MultiRank/Prestige`                        | Prestige! |
-| GET  | `/MultiRank/Season`                          | Aktuelle Season |
-| GET  | `/MultiRank/Season/YearEnd/{year}`           | Jahres-Rückblick |
-| GET  | `/MultiRank/History`                         | Eigene Season-History |
+| POST | `/MultiRank/Prestige` | Prestige! |
+| GET | `/MultiRank/Season` | Aktuelle Season |
+| GET | `/MultiRank/Season/YearEnd/{year}` | Jahres-Rückblick |
+| GET | `/MultiRank/History` | Eigene Season-History |
 
 ---
 
