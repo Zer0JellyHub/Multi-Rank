@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MultiRank</title>
+<style>
+:root{
+  --bg:#0d0d0d; --s1:#151515; --s2:#1c1c1c; --bd:#2a2a2a;
+  --tx:#f0f0f0; --mu:#888;
+  --ac:#7c3aed; --ac2:#a78bfa;
+  --ok:#10b981; --er:#ef4444; --go:#fbbf24;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px}
+
+/* ── Header ── */
+.hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+.hdr h1{font-size:1.8rem;font-weight:800}
+.hdr h1 span{color:var(--ac2)}
+.hdr-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* ── Language toggle ── */
+.lang-btn{
+  display:flex;align-items:center;gap:4px;
+  padding:5px 12px;border-radius:999px;
+  border:1.5px solid var(--bd);background:var(--s2);
+  color:var(--mu);cursor:pointer;font-size:.82rem;font-weight:700;
+  transition:all .2s;user-select:none
+}
+.lang-btn:hover{border-color:var(--ac2);color:var(--tx)}
+.lang-btn.active{border-color:var(--ac);background:var(--ac);color:#fff}
+
+/* ── Season badge ── */
+.sea-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 14px;border-radius:999px;font-size:.8rem;font-weight:700;
+  background:var(--s2);border:1.5px solid var(--bd)
+}
+.sea-badge.Winter{border-color:#93c5fd;color:#93c5fd}
+.sea-badge.Spring{border-color:#86efac;color:#86efac}
+.sea-badge.Summer{border-color:#fcd34d;color:#fcd34d}
+.sea-badge.Autumn{border-color:#fdba74;color:#fdba74}
+
+/* ── Genre tabs ── */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.tab{
+  padding:7px 18px;border-radius:999px;border:1.5px solid var(--bd);
+  background:var(--s1);color:var(--mu);cursor:pointer;
+  font-size:.88rem;font-weight:600;transition:all .2s;white-space:nowrap
+}
+.tab:hover{border-color:var(--ac2);color:var(--tx)}
+.tab.active{background:var(--ac);border-color:var(--ac);color:#fff}
+.tab.custom{border-style:dashed}
+
+/* ── Grid ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:22px}
+.card{
+  background:var(--s1);border:1px solid var(--bd);border-radius:16px;
+  padding:20px;position:relative;overflow:hidden
+}
+.card::before{content:'';position:absolute;inset:0;background:var(--cg,none);opacity:.08;pointer-events:none}
+.card-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:8px}
+.rank-card{grid-column:span 2}
+@media(max-width:640px){.rank-card{grid-column:span 1}}
+
+/* ── Rank display ── */
+.rank-row{display:flex;align-items:center;gap:18px}
+.rank-icon{font-size:3.8rem;line-height:1;min-width:68px;text-align:center}
+.rank-icon img{width:68px;height:68px;border-radius:50%;object-fit:cover;
+  border:3px solid var(--rc,var(--ac));box-shadow:0 0 18px var(--rc,var(--ac))55}
+.rank-name{font-size:2rem;font-weight:800}
+.rank-desc{color:var(--mu);font-size:.83rem;margin-top:3px;max-width:380px}
+.rank-xp{color:var(--ac2);font-size:1rem;font-weight:700;margin-top:5px}
+
+/* ── Progress ── */
+.prog-wrap{margin-top:14px}
+.prog-lbl{display:flex;justify-content:space-between;font-size:.78rem;color:var(--mu);margin-bottom:5px}
+.prog-bar{height:10px;background:var(--bd);border-radius:999px;overflow:hidden}
+.prog-fill{
+  height:100%;border-radius:999px;
+  background:linear-gradient(90deg,var(--ac),var(--ac2));
+  transition:width .9s cubic-bezier(.4,0,.2,1);position:relative
+}
+.prog-fill::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:18px;
+  background:linear-gradient(90deg,transparent,#fff4);
+  animation:shimmer 1.6s infinite
+}
+@keyframes shimmer{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* ── Stats ── */
+.stat-val{font-size:1.9rem;font-weight:800}
+.stat-sub{font-size:.78rem;color:var(--mu);margin-top:4px}
+.prestige-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 10px;border-radius:999px;margin-top:8px;
+  background:linear-gradient(90deg,var(--ac),var(--ac2));
+  font-size:.75rem;font-weight:700
+}
+
+/* ── Nav tabs ── */
+.nav{display:flex;gap:2px;border-bottom:1px solid var(--bd);margin-bottom:18px;flex-wrap:wrap}
+.nav-btn{
+  padding:9px 16px;background:none;border:none;border-bottom:2px solid transparent;
+  color:var(--mu);cursor:pointer;font-size:.88rem;font-weight:600;transition:all .2s;white-space:nowrap
+}
+.nav-btn:hover{color:var(--tx)}
+.nav-btn.active{color:var(--ac2);border-bottom-color:var(--ac2)}
+
+/* ── Table ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{
+  text-align:left;padding:9px 12px;
+  font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--mu);border-bottom:1px solid var(--bd)
+}
+.tbl td{padding:11px 12px;border-bottom:1px solid var(--bd);font-size:.88rem}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr.me td{background:var(--ac)11}
+.pos{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:50%;font-size:.78rem;font-weight:800
+}
+.pos.g{background:#fbbf2420;color:var(--go)}
+.pos.s{background:#ffffff20;color:#d1d5db}
+.pos.b{background:#cd7f3220;color:#cd7f32}
+.pos.n{background:var(--s2);color:var(--mu)}
+
+/* ── Ranks grid ── */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.ritem{
+  background:var(--s2);border:1px solid var(--bd);border-radius:12px;
+  padding:14px;text-align:center;transition:border-color .2s;position:relative;overflow:hidden
+}
+.ritem.done{border-color:var(--rc,var(--ac))}
+.ritem.done::after{
+  content:'✓';position:absolute;top:5px;right:8px;
+  font-size:.7rem;color:var(--ok);font-weight:800
+}
+.ritem-ic{font-size:2.2rem;margin-bottom:8px}
+.ritem-ic img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+.ritem-name{font-weight:700;font-size:.88rem}
+.ritem-xp{font-size:.74rem;color:var(--mu);margin-top:3px}
+.ritem-desc{font-size:.69rem;color:var(--mu);margin-top:5px;line-height:1.3}
+.upload-lbl{
+  display:inline-block;margin-top:8px;padding:4px 11px;
+  background:var(--ac);border-radius:8px;font-size:.73rem;
+  cursor:pointer;font-weight:600;color:#fff;transition:background .2s
+}
+.upload-lbl:hover{background:var(--ac2)}
+input[type=file]{display:none}
+
+/* ── Buttons ── */
+.btn{padding:9px 18px;border-radius:10px;border:none;cursor:pointer;font-size:.88rem;font-weight:600;transition:all .2s}
+.btn-p{background:var(--ac);color:#fff}.btn-p:hover{background:var(--ac2)}
+.btn-d{background:var(--er);color:#fff}.btn-d:hover{filter:brightness(1.2)}
+.btn-g{background:var(--s2);color:var(--tx);border:1px solid var(--bd)}.btn-g:hover{border-color:var(--ac2)}
+
+/* ── Year-end banner ── */
+.ye-banner{
+  background:linear-gradient(135deg,#7c3aed22,#fbbf2422);
+  border:1px solid var(--go);border-radius:16px;padding:20px;
+  text-align:center;margin-bottom:22px
+}
+.ye-banner h2{color:var(--go);font-size:1.3rem;margin-bottom:4px}
+
+/* ── Custom builder ── */
+.builder{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:20px;margin-top:14px}
+.builder h3{margin-bottom:14px;font-size:.95rem}
+.frow{display:flex;gap:10px;margin-bottom:11px;flex-wrap:wrap}
+.fg{flex:1;min-width:140px}
+.fg label{display:block;font-size:.75rem;color:var(--mu);margin-bottom:4px}
+.fg input,.fg select{
+  width:100%;padding:8px 11px;background:var(--s2);
+  border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-size:.88rem
+}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--ac)}
+.rank-row-build{
+  display:flex;align-items:center;gap:7px;margin-bottom:7px;
+  padding:8px;background:var(--s2);border-radius:8px
+}
+.rank-row-build input{flex:1}
+.del-rank{color:var(--er);cursor:pointer;font-size:1.1rem;padding:3px 5px}
+
+/* ── Toast ── */
+#toast{
+  position:fixed;bottom:22px;right:22px;padding:11px 18px;
+  border-radius:12px;background:var(--s1);border:1px solid var(--bd);
+  font-size:.88rem;z-index:9999;opacity:0;transform:translateY(8px);
+  transition:all .3s;pointer-events:none
+}
+#toast.show{opacity:1;transform:none}
+#toast.ok{border-color:var(--ok);color:var(--ok)}
+#toast.er{border-color:var(--er);color:var(--er)}
+
+/* ── Loader ── */
+.loader{display:flex;justify-content:center;padding:48px}
+.spin{width:38px;height:38px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hidden{display:none!important}
+.mt{margin-top:16px}
+.mu{color:var(--mu)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ── Header ───────────────────────────────────────────────────── -->
+  <div class="hdr">
+    <h1>🎮 <span>Multi</span>Rank</h1>
+    <div class="hdr-right">
+      <!-- Language toggle -->
+      <div style="display:flex;gap:4px">
+        <div class="lang-btn active" id="btn-de" onclick="setLang('de')">🇩🇪 DE</div>
+        <div class="lang-btn"        id="btn-en" onclick="setLang('en')">🇬🇧 EN</div>
+      </div>
+      <div id="seaBadge" class="sea-badge">…</div>
+    </div>
+  </div>
+
+  <!-- ── Year-end banner (March only) ─────────────────────────────── -->
+  <div id="yeBanner" class="ye-banner hidden">
+    <h2 id="yeBannerTitle">🏆 Jahres-Rückblick</h2>
+    <p  id="yeBannerSub">Die Winter-Season endet bald — der große Jahresrückblick steht an!</p>
+    <button class="btn btn-p mt" onclick="showNav('yearend')" id="yeBannerBtn">Jahres-Rückblick anzeigen</button>
+  </div>
+
+  <!-- ── Genre tabs ────────────────────────────────────────────────── -->
+  <div id="genreTabs" class="tabs"><div class="loader"><div class="spin"></div></div></div>
+
+  <!-- ── Stat cards ────────────────────────────────────────────────── -->
+  <div id="mainCards"><div class="loader"><div class="spin"></div></div></div>
+
+  <!-- ── Nav ───────────────────────────────────────────────────────── -->
+  <div class="nav" id="mainNav" style="display:none">
+    <button class="nav-btn active" onclick="showNav('lb')"      data-i="nav_lb">🏆 Rangliste</button>
+    <button class="nav-btn"        onclick="showNav('ranks')"   data-i="nav_ranks">📋 Alle Ränge</button>
+    <button class="nav-btn"        onclick="showNav('hist')"    data-i="nav_hist">📅 Season-History</button>
+    <button class="nav-btn"        onclick="showNav('yearend')" data-i="nav_ye">🌟 Jahresrückblick</button>
+    <button class="nav-btn"        onclick="showNav('custom')"  data-i="nav_custom">⚙️ Genre erstellen</button>
+  </div>
+
+  <div id="pane-lb"      class="pane"></div>
+  <div id="pane-ranks"   class="pane hidden"></div>
+  <div id="pane-hist"    class="pane hidden"></div>
+  <div id="pane-yearend" class="pane hidden"></div>
+  <div id="pane-custom"  class="pane hidden"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  i18n
+// ═══════════════════════════════════════════════════════════
+const T = {
+  de: {
+    nav_lb:'🏆 Rangliste', nav_ranks:'📋 Alle Ränge', nav_hist:'📅 Season-History',
+    nav_ye:'🌟 Jahresrückblick', nav_custom:'⚙️ Genre erstellen',
+    rank_card_title:'Aktueller Rang',
+    season_xp:'Season XP', total_xp:'Gesamt XP',
+    lb_total:'🌍 Gesamt', lb_season:'🗓️ Season',
+    lb_user:'Nutzer', lb_genre:'Genre', lb_rank:'Rang',
+    ranks_title:'Alle Ränge',
+    upload_btn:'📤 Bild ändern',
+    upload_ok:'✅ Waifu-Icon hochgeladen!', upload_err:'❌ Upload fehlgeschlagen.',
+    hist_title:'Season-History', hist_season:'Season', hist_xp:'XP erzielt',
+    hist_rank:'Bester Rang', hist_pos:'Platz',
+    hist_empty:'Noch keine Season-History.',
+    ye_title:'Jahres-Rückblick', ye_user:'Nutzer', ye_genre:'Genre',
+    ye_xp:'Jahres-XP', ye_rank:'Top Rang', ye_empty:'Keine Daten.',
+    custom_title:'Neues Custom-Genre',
+    cg_name:'Genre-Name', cg_bg:'Hintergrund (CSS Gradient)',
+    cg_name_ph:'z.B. Dragon Ball',
+    ranks_label:'Ränge', add_rank:'+ Rang',
+    save_genre:'💾 Genre speichern',
+    my_genres:'Meine Custom-Genres', del_genre:'🗑️ Löschen',
+    del_confirm:'Genre wirklich löschen?',
+    err_name:'Genre-Name erforderlich!',
+    err_ranks:'Mindestens 2 Ränge!',
+    genre_saved:'✅ Genre gespeichert!', genre_err:'❌ Fehler beim Speichern.',
+    genre_deleted:'🗑️ Genre gelöscht.',
+    prestige_confirm:'Willst du wirklich Prestige machen? Dein XP wird auf 0 zurückgesetzt!',
+    prestige_btn:'✨ Prestige!',
+    days_left:'noch {n} Tage',
+    max_rank:'🏆 MAX',
+    to_next:'noch {n} XP',
+    no_data:'Konnte Daten nicht laden.',
+    rank_name_ph:'Rang-Name', xp_ph:'XP benötigt', icon_ph:'Emoji/Icon',
+    no_genres:'Noch keine Custom-Genres.',
+  },
+  en: {
+    nav_lb:'🏆 Leaderboard', nav_ranks:'📋 All Ranks', nav_hist:'📅 Season History',
+    nav_ye:'🌟 Year Review', nav_custom:'⚙️ Create Genre',
+    rank_card_title:'Current Rank',
+    season_xp:'Season XP', total_xp:'Total XP',
+    lb_total:'🌍 All-Time', lb_season:'🗓️ Season',
+    lb_user:'User', lb_genre:'Genre', lb_rank:'Rank',
+    ranks_title:'All Ranks',
+    upload_btn:'📤 Change Image',
+    upload_ok:'✅ Waifu icon uploaded!', upload_err:'❌ Upload failed.',
+    hist_title:'Season History', hist_season:'Season', hist_xp:'XP Earned',
+    hist_rank:'Top Rank', hist_pos:'Position',
+    hist_empty:'No season history yet.',
+    ye_title:'Year Review', ye_user:'User', ye_genre:'Genre',
+    ye_xp:'Year XP', ye_rank:'Top Rank', ye_empty:'No data.',
+    custom_title:'New Custom Genre',
+    cg_name:'Genre Name', cg_bg:'Background (CSS Gradient)',
+    cg_name_ph:'e.g. Dragon Ball',
+    ranks_label:'Ranks', add_rank:'+ Rank',
+    save_genre:'💾 Save Genre',
+    my_genres:'My Custom Genres', del_genre:'🗑️ Delete',
+    del_confirm:'Really delete this genre?',
+    err_name:'Genre name required!',
+    err_ranks:'At least 2 ranks required!',
+    genre_saved:'✅ Genre saved!', genre_err:'❌ Failed to save.',
+    genre_deleted:'🗑️ Genre deleted.',
+    prestige_confirm:'Are you sure? Your XP will reset to 0!',
+    prestige_btn:'✨ Prestige!',
+    days_left:'{n} days left',
+    max_rank:'🏆 MAX',
+    to_next:'{n} XP to go',
+    no_data:'Could not load data.',
+    rank_name_ph:'Rank name', xp_ph:'XP required', icon_ph:'Emoji/Icon',
+    no_genres:'No custom genres yet.',
+  }
+};
+
+let lang = localStorage.getItem('mr_lang') || 'de';
+const t = k => {
+  const s = T[lang][k] ?? T['de'][k] ?? k;
+  return s;
+};
+const tf = (k, vars) => {
+  let s = t(k);
+  for (const [p,v] of Object.entries(vars)) s = s.replace(`{${p}}`, v);
+  return s;
+};
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('mr_lang', l);
+  document.getElementById('btn-de').className = 'lang-btn' + (l==='de'?' active':'');
+  document.getElementById('btn-en').className = 'lang-btn' + (l==='en'?' active':'');
+  applyI18n();
+  renderMainCards();
+  renderCurrentPane();
+}
+
+function applyI18n() {
+  document.querySelectorAll('[data-i]').forEach(el => {
+    el.textContent = t(el.dataset.i);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  State
+// ═══════════════════════════════════════════════════════════
+const API = '/MultiRank';
+let me = null, allGenres = [], activeGenreId = 'isekai', currentPane = 'lb';
+
+// ═══════════════════════════════════════════════════════════
+//  Boot
+// ═══════════════════════════════════════════════════════════
+async function init() {
+  // Apply initial lang
+  document.getElementById('btn-de').className = 'lang-btn' + (lang==='de'?' active':'');
+  document.getElementById('btn-en').className = 'lang-btn' + (lang==='en'?' active':'');
+
+  await Promise.all([fetchGenres(), fetchMe()]);
+  renderGenreTabs();
+  renderMainCards();
+  applyI18n();
+  document.getElementById('mainNav').style.display = 'flex';
+  renderLeaderboard();
+}
+
+async function fetchMe() {
+  try { const r = await fetch(`${API}/Me`); if(r.ok){me=await r.json(); activeGenreId=me.activeGenreId;} }
+  catch(e){}
+}
+async function fetchGenres() {
+  try { const r = await fetch(`${API}/Genres`); if(r.ok) allGenres=await r.json(); }
+  catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Genre tabs
+// ═══════════════════════════════════════════════════════════
+function renderGenreTabs() {
+  document.getElementById('genreTabs').innerHTML = allGenres.map(g =>
+    `<div class="tab${g.id===activeGenreId?' active':''}${!g.builtIn?' custom':''}"
+          onclick="pickGenre('${g.id}')">${esc(g.name)}</div>`
+  ).join('');
+}
+
+async function pickGenre(id) {
+  if (id === activeGenreId) return;
+  activeGenreId = id;
+  try { await fetch(`${API}/Genre/SetActive`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({genreId:id})}); }
+  catch(e){}
+  await fetchMe();
+  renderGenreTabs();
+  renderMainCards();
+  if (currentPane === 'ranks') renderRanks();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Main stat cards
+// ═══════════════════════════════════════════════════════════
+function renderMainCards() {
+  const el = document.getElementById('mainCards');
+  if (!me) { el.innerHTML = `<p class="mu">${t('no_data')}</p>`; return; }
+
+  const genre   = allGenres.find(g => g.id === activeGenreId);
+  const rank    = me.currentRank;
+  const next    = me.nextRank;
+  const pct     = me.progressPercent.toFixed(1);
+  const sea     = me.season;
+  const sType   = sea.type; // 'Winter' | 'Spring' | 'Summer' | 'Autumn'
+  const sEmoji  = {Winter:'❄️',Spring:'🌸',Summer:'☀️',Autumn:'🍂'}[sType]??'📅';
+
+  // Season badge
+  const badge = document.getElementById('seaBadge');
+  badge.className = `sea-badge ${sType}`;
+  badge.innerHTML = `${sEmoji} ${esc(sea.name)} — ${tf('days_left',{n:sea.daysRemaining})}`;
+  if (sea.isYearEnd) document.getElementById('yeBanner').classList.remove('hidden');
+
+  // Year-end banner translations
+  document.getElementById('yeBannerTitle').textContent = `🏆 ${t('ye_title')}`;
+  document.getElementById('yeBannerSub').textContent   =
+    lang==='de'
+      ? 'Die Winter-Season endet bald — der große Jahresrückblick steht an!'
+      : 'Winter Season ends soon — the big year review is coming!';
+  document.getElementById('yeBannerBtn').textContent = t('ye_title');
+
+  // Icon
+  let ic = '';
+  if (rank.isImageIcon && rank.icon?.startsWith('/MultiRank/'))
+    ic = `<img src="${rank.icon}" alt="${esc(rank.name)}" style="--rc:${rank.color}">`;
+  else
+    ic = rank.icon || '❓';
+
+  el.innerHTML = `
+    <div class="cards">
+      <div class="card rank-card" style="--cg:${genre?.backgroundGradient??'none'}">
+        <div class="card-lbl">${esc(genre?.name??activeGenreId)} — ${t('rank_card_title')}</div>
+        <div class="rank-row">
+          <div class="rank-icon" style="--rc:${rank.color}">${ic}</div>
+          <div>
+            <div class="rank-name" style="color:${rank.color}">${esc(rank.name)}</div>
+            <div class="rank-desc">${esc(rank.description??'')}</div>
+            <div class="rank-xp">${fmt(me.totalXp)} XP</div>
+          </div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-lbl">
+            <span>${esc(rank.name)}</span>
+            <span>${next ? esc(next.name) : t('max_rank')}</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+          <div class="prog-lbl" style="margin-top:4px">
+            <span></span>
+            <span>${pct}%${next ? ` — ${tf('to_next',{n:fmt(next.xpRequired-me.totalXp)})}` : ''}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-lbl">${t('season_xp')}</div>
+        <div class="stat-val" style="color:var(--ac2)">${fmt(me.seasonXp)}</div>
+        <div class="stat-sub">${sEmoji} ${esc(sea.name)}</div>
+      </div>
+
+      <div class="card">
+        <div class="card-lbl">${t('total_xp')}</div>
+        <div class="stat-val">${fmt(me.totalXp)}</div>
+        ${me.prestige>0 ? `<div class="prestige-badge">✨ Prestige ${me.prestige}</div>` : ''}
+        ${me.prestige===0 && !next
+          ? `<button class="btn btn-p mt" onclick="prestige()">${t('prestige_btn')}</button>`
+          : ''}
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Nav panes
+// ═══════════════════════════════════════════════════════════
+function showNav(name) {
+  document.querySelectorAll('.pane').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`pane-${name}`)?.classList.remove('hidden');
+  const order = ['lb','ranks','hist','yearend','custom'];
+  document.querySelectorAll('.nav-btn')[order.indexOf(name)]?.classList.add('active');
+  currentPane = name;
+  renderCurrentPane();
+}
+
+function renderCurrentPane() {
+  if (currentPane==='lb')      renderLeaderboard();
+  if (currentPane==='ranks')   renderRanks();
+  if (currentPane==='hist')    renderHistory();
+  if (currentPane==='yearend') renderYearEnd();
+  if (currentPane==='custom')  renderCustom();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Leaderboard
+// ═══════════════════════════════════════════════════════════
+let lbSeason = false;
+async function renderLeaderboard(season) {
+  if (season !== undefined) lbSeason = season;
+  const el = document.getElementById('pane-lb');
+  el.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="btn btn-g" ${!lbSeason?'style="border-color:var(--ac)"':''} onclick="renderLeaderboard(false)">${t('lb_total')}</button>
+      <button class="btn btn-g" ${ lbSeason?'style="border-color:var(--ac)"':''} onclick="renderLeaderboard(true)">${t('lb_season')}</button>
+    </div>
+    <div class="loader"><div class="spin"></div></div>`;
+  try {
+    const r   = await fetch(`${API}/Leaderboard?season=${lbSeason}`);
+    const data= await r.json();
+    const myId= me?.userId;
+    el.innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn btn-g" ${!lbSeason?'style="border-color:var(--ac)"':''} onclick="renderLeaderboard(false)">${t('lb_total')}</button>
+        <button class="btn btn-g" ${ lbSeason?'style="border-color:var(--ac)"':''} onclick="renderLeaderboard(true)">${t('lb_season')}</button>
+      </div>
+
+      <!-- User cards (big view) -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px">
+        ${data.slice(0,3).map(u=>{
+          const p=u.position;
+          const pe=p===1?'🥇':p===2?'🥈':'🥉';
+          const ri=u.currentRank?.isImageIcon&&u.currentRank?.icon?.startsWith('/MultiRank/')
+            ?`<img src="${u.currentRank.icon}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid ${u.currentRank?.color??'#fff'}">`
+            :`<span style="font-size:2.2rem">${u.currentRank?.icon??'❓'}</span>`;
+          return `<div class="card" style="text-align:center;--cg:none">
+            <div style="font-size:1.4rem;margin-bottom:6px">${pe}</div>
+            <div style="margin-bottom:8px">${ri}</div>
+            <div style="font-weight:500;font-size:.95rem">${esc(u.username)}</div>
+            <div style="color:${u.currentRank?.color??'var(--ac2)'};font-size:.85rem;font-weight:500;margin-top:3px">${esc(u.currentRank?.name??'?')}</div>
+            <div style="color:var(--mu);font-size:.75rem;margin-top:2px">${esc(u.genreName)}</div>
+            <div style="color:var(--ac2);font-size:.8rem;font-weight:600;margin-top:5px">${fmt(lbSeason?u.seasonXp:u.totalXp)} XP</div>
+            ${u.prestigeCount>0?`<div style="margin-top:5px"><span class="prestige-badge">✨ P${u.prestigeCount}</span></div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- Full table -->
+      <div class="card" style="padding:0;overflow:auto">
+        <table class="tbl">
+          <thead><tr>
+            <th>#</th><th>${t('lb_user')}</th><th>${t('lb_genre')}</th>
+            <th>${t('lb_rank')}</th><th>XP</th>
+          </tr></thead>
+          <tbody>${data.map(u=>{
+            const p=u.position;
+            const pc=p===1?'g':p===2?'s':p===3?'b':'n';
+            const pe=p===1?'🥇':p===2?'🥈':p===3?'🥉':p;
+            const ri=u.currentRank?.isImageIcon&&u.currentRank?.icon?.startsWith('/MultiRank/')
+              ?`<img src="${u.currentRank.icon}" style="width:18px;height:18px;border-radius:50%;vertical-align:middle;margin-right:4px">`
+              :(u.currentRank?.icon??'❓')+' ';
+            const xp=lbSeason?u.seasonXp:u.totalXp;
+            return `<tr class="${u.userId===myId?'me':''}">
+              <td><span class="pos ${pc}">${pe}</span></td>
+              <td><strong>${esc(u.username)}</strong>${u.prestigeCount>0?` <small style="color:var(--ac2)">✨P${u.prestigeCount}</small>`:''}</td>
+              <td><small class="mu">${esc(u.genreName)}</small></td>
+              <td>${ri}<span style="color:${u.currentRank?.color??'#fff'}">${esc(u.currentRank?.name??'?')}</span></td>
+              <td><strong>${fmt(xp)}</strong></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>`;
+  } catch(e) { el.innerHTML=`<p class="mu">${t('no_data')}</p>`; }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Ranks overview  –  Genre-Tabs oben + Rang-Grid
+// ═══════════════════════════════════════════════════════════
+function renderRanks() {
+  const el    = document.getElementById('pane-ranks');
+  const genre = allGenres.find(g=>g.id===activeGenreId);
+  if (!genre) { el.innerHTML=`<p class="mu">${t('no_data')}</p>`; return; }
+  const myXp  = me?.totalXp??0;
+  const isW   = genre.type==='Waifu'||genre.type===3;
+
+  // Mini genre switcher inside the ranks pane
+  const genreSwitcher = `
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px">
+      ${allGenres.map(g=>`
+        <div style="padding:5px 14px;border-radius:999px;border:1.5px solid ${g.id===activeGenreId?'var(--ac)':'var(--bd)'};
+             background:${g.id===activeGenreId?'var(--ac)':'var(--s2)'};color:${g.id===activeGenreId?'#fff':'var(--mu)'};
+             cursor:pointer;font-size:.82rem;font-weight:600;white-space:nowrap"
+             onclick="pickGenreRanks('${g.id}')">
+          ${esc(g.name)}
+        </div>`).join('')}
+    </div>`;
+
+  el.innerHTML = genreSwitcher + `
+    <div class="rgrid">
+      ${genre.ranks.map((r,i)=>{
+        const done = myXp>=r.xpRequired;
+        const next = genre.ranks[i+1];
+        const ic   = r.isImageIcon&&r.icon?.startsWith('/MultiRank/')
+          ? `<img src="${r.icon}" alt="${esc(r.name)}">`
+          : `<span>${r.icon||'❓'}</span>`;
+        return `<div class="ritem${done?' done':''}" style="--rc:${r.color}">
+          <div class="ritem-ic">${ic}</div>
+          <div class="ritem-name" style="color:${done?r.color:'var(--mu)'}">${esc(r.name)}</div>
+          <div class="ritem-xp">${fmt(r.xpRequired)} XP</div>
+          ${r.description?`<div class="ritem-desc">${esc(r.description)}</div>`:''}
+          ${isW?`<label class="upload-lbl">${t('upload_btn')}<input type="file" accept="image/*" onchange="uploadWaifu('${genre.id}',${i},this)"></label>`:''}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function pickGenreRanks(id) {
+  activeGenreId = id;
+  renderGenreTabs();
+  renderRanks();
+}
+
+async function uploadWaifu(gid, idx, inp) {
+  if (!inp.files[0]) return;
+  const fd = new FormData();
+  fd.append('file', inp.files[0]);
+  try {
+    const r = await fetch(`${API}/Waifu/UploadIcon/${gid}/${idx}`,{method:'POST',body:fd});
+    if (r.ok) {
+      toast(t('upload_ok'),'ok');
+      await fetchGenres();
+      renderRanks();
+    } else toast(t('upload_err'),'er');
+  } catch(e){ toast(t('upload_err'),'er'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  History
+// ═══════════════════════════════════════════════════════════
+async function renderHistory() {
+  const el = document.getElementById('pane-hist');
+  el.innerHTML = '<div class="loader"><div class="spin"></div></div>';
+  try {
+    const r    = await fetch(`${API}/History`);
+    const data = await r.json();
+    if (!data.length){ el.innerHTML=`<p class="mu">${t('hist_empty')}</p>`; return; }
+
+    const resultBadge = (h) => {
+      if (h.result === 'CarriedOver')
+        return `<span style="font-size:.7rem;padding:2px 8px;border-radius:999px;background:var(--color-background-success,#10b98122);color:var(--ok)">
+                  ✅ ${lang==='de'?'Rang behalten':'Rank kept'}
+                  ${h.ranksClimbed>0?`+${h.ranksClimbed}`:''}
+                </span>`;
+      if (h.result === 'Demoted')
+        return `<span style="font-size:.7rem;padding:2px 8px;border-radius:999px;background:#ef444422;color:var(--er)">
+                  ⬇️ ${lang==='de'?'−2 Ränge':'−2 ranks'}
+                  ${h.ranksClimbed!==undefined?` (${h.ranksClimbed>=0?'+':''}${h.ranksClimbed} ${lang==='de'?'Ränge':'ranks'})` : ''}
+                </span>`;
+      return `<span style="font-size:.7rem;color:var(--mu)">${lang==='de'?'Reset':'Reset'}</span>`;
+    };
+
+    el.innerHTML = `
+      <div class="card" style="padding:0;overflow:auto">
+        <table class="tbl">
+          <thead><tr>
+            <th>${t('hist_season')}</th>
+            <th>${t('hist_xp')}</th>
+            <th>${t('hist_rank')}</th>
+            <th>${lang==='de'?'Ergebnis':'Result'}</th>
+            <th>${t('hist_pos')}</th>
+          </tr></thead>
+          <tbody>${data.map(h=>`<tr>
+            <td>${esc(h.seasonId)}</td>
+            <td><strong>${fmt(h.xpEarned)}</strong></td>
+            <td>${esc(h.topRankName)}</td>
+            <td>${resultBadge(h)}</td>
+            <td>${h.finalPosition>0?`#${h.finalPosition}`:'–'}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+  } catch(e){ el.innerHTML=`<p class="mu">${t('no_data')}</p>`; }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Year-end
+// ═══════════════════════════════════════════════════════════
+async function renderYearEnd() {
+  const year = new Date().getFullYear();
+  const el   = document.getElementById('pane-yearend');
+  el.innerHTML = '<div class="loader"><div class="spin"></div></div>';
+  try {
+    const r    = await fetch(`${API}/Season/YearEnd/${year}`);
+    const data = await r.json();
+    const lb   = data.leaderboard;
+    if (!lb.length){ el.innerHTML=`<p class="mu">${t('ye_empty')}</p>`; return; }
+    el.innerHTML = `
+      <div class="ye-banner" style="margin-bottom:18px">
+        <h2>${esc(data.title)}</h2>
+        <p>${year}</p>
+      </div>
+      <div class="card" style="padding:0;overflow:auto">
+        <table class="tbl">
+          <thead><tr>
+            <th>#</th><th>${t('ye_user')}</th><th>${t('ye_genre')}</th>
+            <th>${t('ye_xp')}</th><th>${t('ye_rank')}</th>
+          </tr></thead>
+          <tbody>${lb.map(u=>{
+            const pe=u.position===1?'🥇':u.position===2?'🥈':u.position===3?'🥉':`#${u.position}`;
+            return `<tr>
+              <td>${pe}</td>
+              <td><strong>${esc(u.username)}</strong>${u.prestige>0?` ✨P${u.prestige}`:''}</td>
+              <td><small class="mu">${esc(u.genreName)}</small></td>
+              <td><strong style="color:var(--go)">${fmt(u.yearXp)}</strong></td>
+              <td>–</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>`;
+  } catch(e){ el.innerHTML=`<p class="mu">${t('no_data')}</p>`; }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Custom genre builder
+// ═══════════════════════════════════════════════════════════
+let rrc = 0;
+function renderCustom() {
+  rrc = 0;
+  const el      = document.getElementById('pane-custom');
+  const customs = allGenres.filter(g=>!g.builtIn);
+
+  el.innerHTML = `
+    <div class="builder">
+      <h3>➕ ${t('custom_title')}</h3>
+      <div class="frow">
+        <div class="fg"><label>${t('cg_name')}</label>
+          <input id="cg-name" type="text" placeholder="${t('cg_name_ph')}"></div>
+        <div class="fg"><label>${t('cg_bg')}</label>
+          <input id="cg-bg" type="text" value="linear-gradient(135deg,#111827,#1e3a5f)"></div>
+      </div>
+      <div id="cg-ranks">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <label style="font-size:.75rem;color:var(--mu);text-transform:uppercase;letter-spacing:.05em">${t('ranks_label')}</label>
+          <button class="btn btn-g" style="padding:4px 10px;font-size:.78rem" onclick="addRank()">${t('add_rank')}</button>
+        </div>
+      </div>
+      <button class="btn btn-p mt" onclick="saveGenre()">${t('save_genre')}</button>
+    </div>
+
+    ${customs.length?`
+    <div style="margin-top:20px">
+      <h3 style="margin-bottom:12px">📦 ${t('my_genres')}</h3>
+      ${customs.map(g=>`
+        <div class="card" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div>
+            <strong>${esc(g.name)}</strong>
+            <div class="mu" style="font-size:.78rem">${g.ranks.length} ${t('ranks_label')} · ID: ${g.id}</div>
+          </div>
+          <button class="btn btn-d" style="padding:5px 12px;font-size:.78rem" onclick="delGenre('${g.id}')">${t('del_genre')}</button>
+        </div>`).join('')}
+    </div>` : `<p class="mu mt">${t('no_genres')}</p>`}`;
+
+  // Seed with 3 starter rows
+  addRank(lang==='de'?'Bronze':'Bronze', 0, '🥉');
+  addRank(lang==='de'?'Silber':'Silver', 50000, '🥈');
+  addRank(lang==='de'?'Gold':'Gold', 200000, '🥇');
+}
+
+function addRank(name='', xp=0, icon='⭐') {
+  const id  = `rr-${rrc++}`;
+  const div = document.createElement('div');
+  div.className = 'rank-row-build';
+  div.id        = id;
+  div.innerHTML = `
+    <input type="text"   placeholder="${t('rank_name_ph')}" value="${esc(name)}"  class="rr-name">
+    <input type="number" placeholder="${t('xp_ph')}"        value="${xp}"          class="rr-xp" style="max-width:110px">
+    <input type="text"   placeholder="${t('icon_ph')}"      value="${esc(icon)}"   class="rr-ic" style="max-width:72px">
+    <input type="color"  value="#ffffff" class="rr-col" style="width:34px;height:32px;padding:2px;background:none;border:1px solid var(--bd);border-radius:6px;cursor:pointer">
+    <span class="del-rank" onclick="document.getElementById('${id}').remove()">✕</span>`;
+  document.getElementById('cg-ranks').appendChild(div);
+}
+
+async function saveGenre() {
+  const name = document.getElementById('cg-name').value.trim();
+  const bg   = document.getElementById('cg-bg').value.trim();
+  if (!name) { toast(t('err_name'),'er'); return; }
+
+  const ranks = [];
+  document.querySelectorAll('.rank-row-build').forEach(row=>{
+    const n = row.querySelector('.rr-name').value.trim();
+    if (!n) return;
+    ranks.push({
+      name: n,
+      xpRequired: parseInt(row.querySelector('.rr-xp').value)||0,
+      icon: row.querySelector('.rr-ic').value.trim()||'⭐',
+      color: row.querySelector('.rr-col').value,
+      description:'', isImageIcon:false
+    });
+  });
+  if (ranks.length<2){ toast(t('err_ranks'),'er'); return; }
+  ranks.sort((a,b)=>a.xpRequired-b.xpRequired);
+
+  try {
+    const r = await fetch(`${API}/Genre/Custom`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name, backgroundGradient:bg, ranks, builtIn:false, type:4})
+    });
+    if (r.ok) {
+      toast(t('genre_saved'),'ok');
+      await fetchGenres();
+      renderGenreTabs();
+      renderCustom();
+    } else toast(t('genre_err'),'er');
+  } catch(e){ toast(t('genre_err'),'er'); }
+}
+
+async function delGenre(id) {
+  if (!confirm(t('del_confirm'))) return;
+  try {
+    const r = await fetch(`${API}/Genre/Custom/${id}`,{method:'DELETE'});
+    if (r.ok) {
+      toast(t('genre_deleted'),'ok');
+      if (activeGenreId===id) activeGenreId='isekai';
+      await fetchGenres();
+      renderGenreTabs();
+      renderCustom();
+    }
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Prestige
+// ═══════════════════════════════════════════════════════════
+async function prestige() {
+  if (!confirm(t('prestige_confirm'))) return;
+  try {
+    const r = await fetch(`${API}/Prestige`,{method:'POST'});
+    const d = await r.json();
+    if (r.ok) { toast(`✨ ${d.message}`,'ok'); await fetchMe(); renderMainCards(); }
+    else toast(`❌ ${d.message}`,'er');
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Helpers
+// ═══════════════════════════════════════════════════════════
+function fmt(n) {
+  n = n ?? 0;
+  if (n>=1_000_000) return (n/1_000_000).toFixed(1)+'M';
+  if (n>=1_000)     return (n/1_000).toFixed(0)+'K';
+  return String(n);
+}
+function esc(s) {
+  return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let _tt;
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  clearTimeout(_tt);
+  _tt = setTimeout(()=>el.classList.remove('show'), 3400);
+}
+
+init();
+</script>
+</body>
+</html>

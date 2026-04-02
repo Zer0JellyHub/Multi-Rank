@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Jellyfin.Plugin.MultiRank</AssemblyName>
+    <RootNamespace>Jellyfin.Plugin.MultiRank</RootNamespace>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.0</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!--
+      Jellyfin provides its own assemblies at runtime.
+      We reference them here for compilation only (PrivateAssets=all),
+      so they are NOT copied into the plugin output folder.
+      Only Microsoft.Data.Sqlite needs to be shipped with the plugin.
+    -->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Jellyfin SDK – compile-time only, NOT shipped -->
+    <PackageReference Include="Jellyfin.Controller" Version="10.9.0">
+      <PrivateAssets>all</PrivateAssets>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="Jellyfin.Model" Version="10.9.0">
+      <PrivateAssets>all</PrivateAssets>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+
+    <!-- SQLite driver – MUST be shipped with the plugin -->
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0">
+      <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Embed HTML pages as web resources inside the DLL -->
+  <ItemGroup>
+    <EmbeddedResource Include="Web\**\*" />
+  </ItemGroup>
+
+</Project>

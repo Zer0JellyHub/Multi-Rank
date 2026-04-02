@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>MultiRank – Settings</title>
+<style>
+:root{--bg:#0d0d0d;--s1:#151515;--s2:#1c1c1c;--bd:#2a2a2a;--tx:#f0f0f0;--mu:#888;--ac:#7c3aed;--ac2:#a78bfa;--ok:#10b981}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',sans-serif;padding:32px 16px}
+.wrap{max-width:720px;margin:0 auto}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:10px}
+h1{font-size:1.4rem;font-weight:800}
+.lang-btn{display:flex;align-items:center;gap:4px;padding:5px 12px;border-radius:999px;border:1.5px solid var(--bd);background:var(--s2);color:var(--mu);cursor:pointer;font-size:.82rem;font-weight:700;transition:all .2s}
+.lang-btn:hover{border-color:var(--ac2);color:var(--tx)}
+.lang-btn.active{border-color:var(--ac);background:var(--ac);color:#fff}
+h2{font-size:.9rem;color:var(--ac2);margin:22px 0 10px;padding-bottom:7px;border-bottom:1px solid var(--bd)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:.75rem;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.fg input,.fg select{padding:9px 11px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-size:.88rem;width:100%}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--ac)}
+.hint{font-size:.72rem;color:var(--mu);margin-top:3px}
+.toggle{display:flex;align-items:center;justify-content:space-between;padding:11px;background:var(--s2);border-radius:8px;border:1px solid var(--bd);margin-bottom:7px}
+.toggle label{text-transform:none;letter-spacing:0;color:var(--tx);font-size:.88rem;font-weight:400}
+input[type=checkbox]{width:17px;height:17px;accent-color:var(--ac)}
+.btn{width:100%;padding:11px;border-radius:10px;border:none;cursor:pointer;font-size:.9rem;font-weight:700;margin-top:22px;background:var(--ac);color:#fff}
+.btn:hover{background:var(--ac2)}
+#toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;background:var(--s1);border:1px solid var(--bd);border-radius:10px;opacity:0;transition:.3s;pointer-events:none}
+#toast.show{opacity:1}
+#toast.ok{border-color:var(--ok);color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hdr">
+    <h1 id="page-title">⚙️ MultiRank – Einstellungen</h1>
+    <div style="display:flex;gap:4px">
+      <div class="lang-btn active" id="btn-de" onclick="setLang('de')">🇩🇪 DE</div>
+      <div class="lang-btn"        id="btn-en" onclick="setLang('en')">🇬🇧 EN</div>
+    </div>
+  </div>
+
+  <h2 id="sec-xp">XP Berechnung</h2>
+  <div class="grid">
+    <div class="fg">
+      <label id="l-xpmin">XP pro Minute</label>
+      <input type="number" id="xpPerMinute" min="0" value="2">
+      <span class="hint" id="h-xpmin">XP für jede tatsächlich gesehene Minute</span>
+    </div>
+    <div class="fg">
+      <label id="l-xpep">XP pro Folge</label>
+      <input type="number" id="xpPerEpisode" min="0" value="20">
+      <span class="hint" id="h-xpep">Bonus-XP für abgeschlossene Episode</span>
+    </div>
+    <div class="fg">
+      <label id="l-xpmov">XP pro Film</label>
+      <input type="number" id="xpPerMovie" min="0" value="50">
+      <span class="hint" id="h-xpmov">Bonus-XP für abgeschlossenen Film</span>
+    </div>
+    <div class="fg">
+      <label id="l-defgenre">Standard-Genre</label>
+      <select id="defaultGenre">
+        <option value="isekai">Isekai</option>
+        <option value="abenteuer">Abenteurer-Gilde</option>
+        <option value="fortnite">Fortnite Ranked</option>
+        <option value="waifu">Waifu Tier</option>
+      </select>
+    </div>
+  </div>
+
+  <h2 id="sec-ac">Anti-Cheat</h2>
+  <div class="grid">
+    <div class="fg">
+      <label id="l-epth">Min. Abschluss % (Folge)</label>
+      <input type="number" id="episodeThreshold" min="1" max="100" value="80">
+      <span class="hint" id="h-epth">Wie viel % einer Folge gesehen werden muss</span>
+    </div>
+    <div class="fg">
+      <label id="l-movth">Min. Abschluss % (Film)</label>
+      <input type="number" id="movieThreshold" min="1" max="100" value="80">
+    </div>
+    <div class="fg">
+      <label id="l-epmin">Min. Sekunden (Folge)</label>
+      <input type="number" id="episodeMinWatch" min="0" value="900">
+      <span class="hint" id="h-epmin">Standard: 900s = 15 Min</span>
+    </div>
+    <div class="fg">
+      <label id="l-movmin">Min. Sekunden (Film)</label>
+      <input type="number" id="movieMinWatch" min="0" value="2700">
+      <span class="hint" id="h-movmin">Standard: 2700s = 45 Min</span>
+    </div>
+  </div>
+
+  <h2 id="sec-bonus">Watch-Session Bonus</h2>
+  <div class="toggle">
+    <label id="l-enablebonus">Session-Bonus aktivieren</label>
+    <input type="checkbox" id="enableSessionBonus" checked>
+  </div>
+  <div class="grid">
+    <div class="fg">
+      <label id="l-seamin">Mindest-Minuten für Bonus</label>
+      <input type="number" id="sessionThreshold" min="1" value="90">
+      <span class="hint" id="h-seamin">Wenn du an einem Tag ≥ X Min schaust</span>
+    </div>
+    <div class="fg">
+      <label id="l-seapct">Bonus in Prozent</label>
+      <input type="number" id="sessionBonusPercent" min="1" max="200" value="25">
+      <span class="hint" id="h-seapct">+25% = 1,25× XP an diesem Tag</span>
+    </div>
+  </div>
+
+  <h2 id="sec-feat">Features</h2>
+  <div class="toggle"><label id="l-seasons">🗓️ Seasons aktivieren</label><input type="checkbox" id="enableSeasons" checked></div>
+  <div class="toggle"><label id="l-ye">🏆 Jahres-Rückblick anzeigen (Ende Winter-Season)</label><input type="checkbox" id="showYearEnd" checked></div>
+  <div class="toggle"><label id="l-prestige">✨ Prestige aktivieren</label><input type="checkbox" id="enablePrestige" checked></div>
+  <div class="toggle"><label id="l-lb">📊 Rangliste für alle sichtbar</label><input type="checkbox" id="showLeaderboard" checked></div>
+
+  <h2 id="sec-carryover">Season Carry-Over Regel</h2>
+  <div class="grid">
+    <div class="fg">
+      <label id="l-co-climb">Mindest-Rang-Aufstiege für Carry-Over</label>
+      <input type="number" id="carryOverMinClimb" min="1" max="10" value="2">
+      <span class="hint" id="h-co-climb">Wer ≥ X Ränge gestiegen ist behält seinen Rang in die nächste Season</span>
+    </div>
+    <div class="fg">
+      <label id="l-co-demotion">Degradierung bei Nicht-Erreichen (Ränge)</label>
+      <input type="number" id="demotionSteps" min="1" max="10" value="2">
+      <span class="hint" id="h-co-demotion">Wer die Schwelle nicht erreicht wird um X Ränge degradiert</span>
+    </div>
+  </div>
+
+  <h2 id="sec-pb">Playback Reporting</h2>
+  <div class="fg">
+    <label id="l-pbpath">Pfad zur playback_reporting.db</label>
+    <input type="text" id="pbPath" placeholder="/config/data/playback_reporting.db">
+    <span class="hint" id="h-pbpath">Leer lassen für Auto-Erkennung</span>
+  </div>
+
+  <button class="btn" id="saveBtn" onclick="save()">💾 Einstellungen speichern</button>
+</div>
+<div id="toast"></div>
+
+<script>
+const translations = {
+  de: {
+    pageTitle:'⚙️ MultiRank – Einstellungen',
+    secXp:'XP Berechnung', secAc:'Anti-Cheat', secBonus:'Watch-Session Bonus',
+    secFeat:'Features', secPb:'Playback Reporting',
+    lXpmin:'XP pro Minute', hXpmin:'XP für jede tatsächlich gesehene Minute',
+    lXpep:'XP pro Folge',   hXpep:'Bonus-XP für abgeschlossene Episode',
+    lXpmov:'XP pro Film',   hXpmov:'Bonus-XP für abgeschlossenen Film',
+    lDefgenre:'Standard-Genre',
+    lEpth:'Min. Abschluss % (Folge)', hEpth:'Wie viel % gesehen werden muss',
+    lMovth:'Min. Abschluss % (Film)',
+    lEpmin:'Min. Sekunden (Folge)', hEpmin:'Standard: 900s = 15 Min',
+    lMovmin:'Min. Sekunden (Film)', hMovmin:'Standard: 2700s = 45 Min',
+    lEnablebonus:'Session-Bonus aktivieren',
+    lSeamin:'Mindest-Minuten für Bonus', hSeamin:'Wenn du an einem Tag ≥ X Min schaust',
+    lSeapct:'Bonus in Prozent',         hSeapct:'+25% = 1,25× XP an diesem Tag',
+    lSeasons:'🗓️ Seasons aktivieren',
+    lYe:'🏆 Jahres-Rückblick anzeigen (Ende Winter-Season)',
+    lPrestige:'✨ Prestige aktivieren',
+    lLb:'📊 Rangliste für alle sichtbar',
+    lPbpath:'Pfad zur playback_reporting.db', hPbpath:'Leer lassen für Auto-Erkennung',
+    saveBtn:'💾 Einstellungen speichern',
+    saved:'✅ Gespeichert!',
+  },
+  en: {
+    pageTitle:'⚙️ MultiRank – Settings',
+    secXp:'XP Calculation', secAc:'Anti-Cheat', secBonus:'Watch-Session Bonus',
+    secFeat:'Features', secPb:'Playback Reporting',
+    lXpmin:'XP per Minute',   hXpmin:'XP for every real minute watched',
+    lXpep:'XP per Episode',   hXpep:'Bonus XP for completing an episode',
+    lXpmov:'XP per Movie',    hXpmov:'Bonus XP for completing a movie',
+    lDefgenre:'Default Genre',
+    lEpth:'Min. Completion % (Episode)', hEpth:'How much % must be watched',
+    lMovth:'Min. Completion % (Movie)',
+    lEpmin:'Min. Seconds (Episode)', hEpmin:'Default: 900s = 15 min',
+    lMovmin:'Min. Seconds (Movie)',  hMovmin:'Default: 2700s = 45 min',
+    lEnablebonus:'Enable Session Bonus',
+    lSeamin:'Min. Minutes for Bonus', hSeamin:'If you watch ≥ X min in one day',
+    lSeapct:'Bonus Percent',          hSeapct:'+25% = 1.25× XP that day',
+    lSeasons:'🗓️ Enable Seasons',
+    lYe:'🏆 Show Year Review (end of Winter Season)',
+    lPrestige:'✨ Enable Prestige',
+    lLb:'📊 Show Leaderboard to all users',
+    lPbpath:'Path to playback_reporting.db', hPbpath:'Leave empty for auto-detect',
+    saveBtn:'💾 Save Settings',
+    saved:'✅ Saved!',
+  }
+};
+
+let lang = localStorage.getItem('mr_lang')||'de';
+
+function setLang(l){
+  lang = l;
+  localStorage.setItem('mr_lang', l);
+  document.getElementById('btn-de').className='lang-btn'+(l==='de'?' active':'');
+  document.getElementById('btn-en').className='lang-btn'+(l==='en'?' active':'');
+  applyTranslations();
+}
+
+function applyTranslations(){
+  const T = translations[lang];
+  const s = (id,key) => { const el=document.getElementById(id); if(el) el.textContent=T[key]??''; };
+  s('page-title','pageTitle'); s('sec-xp','secXp'); s('sec-ac','secAc');
+  s('sec-bonus','secBonus'); s('sec-feat','secFeat'); s('sec-pb','secPb');
+  s('l-xpmin','lXpmin'); s('h-xpmin','hXpmin');
+  s('l-xpep','lXpep');   s('h-xpep','hXpep');
+  s('l-xpmov','lXpmov'); s('h-xpmov','hXpmov');
+  s('l-defgenre','lDefgenre');
+  s('l-epth','lEpth');   s('h-epth','hEpth');
+  s('l-movth','lMovth');
+  s('l-epmin','lEpmin'); s('h-epmin','hEpmin');
+  s('l-movmin','lMovmin'); s('h-movmin','hMovmin');
+  s('l-enablebonus','lEnablebonus');
+  s('l-seamin','lSeamin'); s('h-seamin','hSeamin');
+  s('l-seapct','lSeapct'); s('h-seapct','hSeapct');
+  s('l-seasons','lSeasons'); s('l-ye','lYe');
+  s('l-prestige','lPrestige'); s('l-lb','lLb');
+  s('l-pbpath','lPbpath'); s('h-pbpath','hPbpath');
+  s('saveBtn','saveBtn');
+}
+
+async function save(){
+  const cfg = {
+    xpPerMinute:                       parseInt(document.getElementById('xpPerMinute').value),
+    xpPerEpisode:                      parseInt(document.getElementById('xpPerEpisode').value),
+    xpPerMovie:                        parseInt(document.getElementById('xpPerMovie').value),
+    defaultGenreId:                    document.getElementById('defaultGenre').value,
+    episodeCompletionThresholdPercent: parseInt(document.getElementById('episodeThreshold').value),
+    movieCompletionThresholdPercent:   parseInt(document.getElementById('movieThreshold').value),
+    episodeMinWatchSeconds:            parseInt(document.getElementById('episodeMinWatch').value),
+    movieMinWatchSeconds:              parseInt(document.getElementById('movieMinWatch').value),
+    enableSessionBonus:                document.getElementById('enableSessionBonus').checked,
+    sessionBonusThresholdMinutes:      parseInt(document.getElementById('sessionThreshold').value),
+    sessionBonusPercent:               parseInt(document.getElementById('sessionBonusPercent').value),
+    enableSeasons:                     document.getElementById('enableSeasons').checked,
+    showYearEndSummary:                document.getElementById('showYearEnd').checked,
+    enablePrestige:                    document.getElementById('enablePrestige').checked,
+    showLeaderboard:                   document.getElementById('showLeaderboard').checked,
+    seasonCarryOverMinRankClimb:       parseInt(document.getElementById('carryOverMinClimb').value),
+    seasonDemotionSteps:               parseInt(document.getElementById('demotionSteps').value),
+    playbackReportingDbPath:           document.getElementById('pbPath').value.trim(),
+  };
+  // Standard Jellyfin plugin config API
+  await ApiClient.updatePluginConfiguration('b2f3d4e5-6789-4abc-def0-123456789abc', cfg);
+  const T = translations[lang];
+  const el = document.getElementById('toast');
+  el.textContent = T.saved;
+  el.className = 'show ok';
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// Init
+document.getElementById('btn-de').className='lang-btn'+(lang==='de'?' active':'');
+document.getElementById('btn-en').className='lang-btn'+(lang==='en'?' active':'');
+applyTranslations();
+</script>
+</body>
+</html>
