@@ -19,7 +19,7 @@ public sealed class MultiRankController : ControllerBase
     private readonly IUserManager _users;
 
     // Shorthand accessors
-    private DatabaseService     Db      => Plugin.Instance!.DbService!;
+    private DatabaseService    Db      => Plugin.Instance!.DbService!;
     private GenreService        Genres  => Plugin.Instance!.GenreService!;
     private SeasonService       Seasons => Plugin.Instance!.SeasonService!;
     private XpService           Xp      => Plugin.Instance!.XpService!;
@@ -195,7 +195,9 @@ public sealed class MultiRankController : ControllerBase
     public IActionResult GetWaifuIcon(string genreId, int rankIndex)
     {
         var data = Genres.GetWaifuIcon(genreId, rankIndex);
-        return data is null ? NotFound() : File(data, "image/png");
+        if (data == null) return NotFound();
+
+        return base.File(data, "image/png");
     }
 
     // ────────────────────────────────────────────────────────────────────────
