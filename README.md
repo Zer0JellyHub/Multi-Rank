@@ -1,4 +1,4 @@
-# 🎮 MultiRank – Jellyfin Plugin (working)
+# 🎮 MultiRank – Jellyfin Plugin (not yet working)
 
 > **Requirement:** [Playback Reporting Plugin](https://github.com/jellyfin/jellyfin-plugin-playbackreporting) must be installed.
 
