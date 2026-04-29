@@ -53,14 +53,14 @@ public sealed class MultiRankController : ControllerBase
         // ── NEU: User wird automatisch angelegt wenn noch nicht vorhanden ──
         if (u is null)
         {
-            u = new UserRank
+            u = new UserRankData
             {
-                UserId        = userId,
-                Username      = username,
-                TotalXp       = 0,
+                UserId          = userId,
+                Username        = username,
+                TotalXp         = 0,
                 CurrentSeasonXp = 0,
-                PrestigeCount = 0,
-                ActiveGenreId = "isekai",
+                PrestigeCount   = 0,
+                ActiveGenreId   = "isekai",
             };
             Db.UpsertUser(u);
         }
