@@ -43,10 +43,27 @@ public sealed class MultiRankController : ControllerBase
         var jfUser   = _users.GetUserById(Guid.Parse(userId));
         var username = jfUser?.Username ?? "Unknown";
 
-        await Xp.SyncAsync(userId, username, PlaybackDbPath());
+        var dbPath = PlaybackDbPath();
+        _log.LogInformation("MultiRank: PlaybackDB path = {Path}", dbPath);
+
+        await Xp.SyncAsync(userId, username, dbPath);
 
         var u = Db.GetUser(userId);
-        if (u is null) return NotFound("No rank profile found.");
+
+        // ── NEU: User wird automatisch angelegt wenn noch nicht vorhanden ──
+        if (u is null)
+        {
+            u = new UserRank
+            {
+                UserId        = userId,
+                Username      = username,
+                TotalXp       = 0,
+                CurrentSeasonXp = 0,
+                PrestigeCount = 0,
+                ActiveGenreId = "isekai",
+            };
+            Db.UpsertUser(u);
+        }
 
         var genre    = Genres.GetGenre(u.ActiveGenreId);
         var curRank  = Genres.GetRankForXp(u.ActiveGenreId, u.TotalXp);
@@ -285,21 +302,45 @@ public sealed class MultiRankController : ControllerBase
 
     private string PlaybackDbPath()
     {
-        if (!string.IsNullOrEmpty(Cfg.PlaybackReportingDbPath))
+        // 1. Manuell gesetzter Pfad in den Plugin-Settings
+        if (!string.IsNullOrEmpty(Cfg.PlaybackReportingDbPath) &&
+            System.IO.File.Exists(Cfg.PlaybackReportingDbPath))
             return Cfg.PlaybackReportingDbPath;
 
-        foreach (var basePath in new[]
+        // 2. Alle möglichen Pfade durchsuchen – Synology zuerst!
+        var candidates = new[]
         {
-            "/config/data",
-            Path.Combine(Environment.GetFolderPath(
-                Environment.SpecialFolder.UserProfile), ".local", "share", "jellyfin", "data"),
-            Path.Combine(Environment.GetFolderPath(
-                Environment.SpecialFolder.ApplicationData), "jellyfin", "data"),
-        })
+            // ── Synology NAS (Paketcenter) ──
+            "/volume1/@appdata/Jellyfin/data/playback_reporting.db",
+            "/volume2/@appdata/Jellyfin/data/playback_reporting.db",
+            "/volume3/@appdata/Jellyfin/data/playback_reporting.db",
+
+            // ── Docker ──
+            "/config/data/playback_reporting.db",
+            "/data/playback_reporting.db",
+
+            // ── Linux ──
+            Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                ".local", "share", "jellyfin", "data", "playback_reporting.db"),
+
+            // ── Windows ──
+            Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "jellyfin", "data", "playback_reporting.db"),
+        };
+
+        foreach (var path in candidates)
         {
-            var candidate = Path.Combine(basePath, "playback_reporting.db");
-            if (System.IO.File.Exists(candidate)) return candidate;
+            if (System.IO.File.Exists(path))
+            {
+                _log.LogInformation("MultiRank: Found PlaybackDB at {Path}", path);
+                return path;
+            }
         }
+
+        _log.LogWarning("MultiRank: playback_reporting.db nicht gefunden! " +
+                        "Bitte Pfad in den Plugin-Settings manuell eintragen.");
         return string.Empty;
     }
 }
